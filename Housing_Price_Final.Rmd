@@ -1,0 +1,187 @@
+---
+title: "Project 2"
+author: "Austin Lee"
+date: "2023-04-20"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Helper packages
+library(tidyverse)
+library(reshape2) # for data shaping
+library(dplyr) # for data manipulation
+library(ggplot2) # for awesome graphics
+# Modeling process packages
+library(rsample) # for resampling procedures
+library(caret) # for resampling and model training
+# Model interpretability packages
+library(vip) # variable importance
+
+```{r}
+# Load the California Housing dataset
+url <- "https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/housing/housing.csv"
+Housing <- read.table(url, header = TRUE, sep = ",")
+
+# View the dataset
+View(Housing)
+
+# Install the ISLR package
+install.packages("ISLR")
+
+# Load the ISLR package
+library(ISLR)
+```
+
+
+1. 
+```{r}
+ 
+# Load the California Housing dataset
+url <- "https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/housing/housing.csv"
+Housing <- read.table(url, header = TRUE, sep = ",")
+
+# Install the rsample package
+install.packages("rsample")
+
+# Load the rsample package
+library(rsample)
+
+# Split the data into training and testing sets using rsample
+set.seed(123)
+split <- initial_split(Housing, prop = 0.7, strata = "ocean_proximity")
+train <- training(split)
+test <- testing(split)
+
+# Verify that the training and testing sets were created correctly
+nrow(train) + nrow(test) == nrow(Housing)
+
+model <- lm(median_house_value ~ median_income + total_rooms + population, data = Housing)
+summary(model)
+
+library(ggplot2)
+
+ggplot(data = Housing, aes(x = median_income, y = median_house_value)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  labs(x = "Median Income", y = "Median House Value ($)", title = "Relationship between Median Income and Median House Value")
+```
+
+
+3. 
+model 2: 
+```{r}
+# Train the model2
+model2 <- lm(median_house_value ~ median_income + population, data = Housing)
+
+# Print the summary of the model
+summary(model2)
+```
+
+model 3:
+```{r}
+# Load the California Housing dataset
+url <- "https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/housing/housing.csv"
+Housing <- read.table(url, header = TRUE, sep = ",")
+
+# Train the model3
+model3 <- lm(median_house_value ~ median_income  + population + housing_median_age, data = Housing)
+
+# Print the summary of the model
+summary(model3)
+```
+
+
+4. 
+```{r}
+library(caret)
+library(mlr)
+
+# Define the models
+model1 <- lm(median_house_value ~ median_income, data = Housing)
+model2 <- lm(median_house_value ~ median_income  + population, data = Housing)
+model3 <- lm(median_house_value ~ median_income + population + housing_median_age, data = Housing)
+
+# Define the cross-validation method
+ctrl <- trainControl(method = "cv", number = 5)
+```
+
+
+
+```{r}
+# Update caret package to the latest version
+install.packages("caret", dependencies = TRUE)
+library(caret)
+# Verify the column names to ensure they match
+colnames(Housing)
+```
+
+
+
+
+
+
+
+
+
+5. 
+```{r}
+# Load required libraries
+library(ggplot2)
+library(gridExtra)
+
+# Train Simple Linear Model (model1)
+model1 <- lm(median_house_value ~ median_income, data=Housing)
+
+# Pair of plots for Simple linear model (model1)
+p1 <- ggplot(data=model1, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  ggtitle("Residuals vs. Fitted Values") +
+  xlab("Fitted values") +
+  ylab("Residuals") 
+
+p2 <- ggplot(data=model1, aes(sample=.resid)) +
+  geom_qq() +
+  ggtitle("Normal Q-Q Plot") 
+
+# Arrange the two plots together using grid.arrange() function
+grid.arrange(p1, p2, ncol=2)
+
+# Train Multiple Linear Model (model3)
+model3 <- lm(median_house_value ~ median_income  + population + housing_median_age, data=Housing)
+
+# Pair of plots for Multiple linear model (model3)
+p1 <- ggplot(data=model3, aes(x=.fitted, y=.resid)) +
+  geom_point() +
+  ggtitle("Residuals vs. Fitted Values") +
+  xlab("Fitted values") +
+  ylab("Residuals") 
+
+p2 <- ggplot(data=model3, aes(sample=.resid)) +
+  geom_qq() +
+  ggtitle("Normal Q-Q Plot") 
+
+# Arrange the two plots together using grid.arrange() function
+grid.arrange(p1, p2, ncol=2)
+```
+
+------------
+For the Simple linear model (model1):
+
+Independence among residuals: The residuals are randomly scattered around the horizontal axis in the "Residuals vs. Fitted Values" plot, indicating that there is no clear pattern in the residuals. Thus, the assumption of independence among residuals is likely to be met.
+
+Normality of residuals: The residuals follow a straight line in the "Normal Q-Q Plot" plot, indicating that the assumption of normality of residuals is likely to be met.
+
+Equal variance for residuals: The residuals are randomly scattered around the horizontal axis in the "Residuals vs. Fitted Values" plot, indicating that there is no clear pattern in the residuals. Thus, the assumption of equal variance for residuals is likely to be met.
+
+For the Multiple linear model (model3):
+
+Independence among residuals: The residuals are randomly scattered around the horizontal axis 
+
+
+
